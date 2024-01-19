@@ -11,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [perPage, setPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [array, setArray] = useState([]);
 
   function handleSubmit() {
     setLoading(true);
@@ -49,6 +50,7 @@ function App() {
       .then((data) => {
         console.log(data);
         setUserRepos(data);
+        assignNumberofPages()
         setError(null);
         setLoading(false);
       })
@@ -74,6 +76,21 @@ function App() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
+
+
+  function assignNumberofPages() {
+    const newArray = [];
+    for (let i = 1; i <= Math.ceil(userData.public_repos / perPage); i++) {
+      newArray.push(i);
+    }
+    setArray(newArray)
+  }
+
+  useEffect(() => {
+    if (userData === null) return;
+    assignNumberofPages();
+  }, [perPage])
+
 
   return (
     <div className="container">
@@ -107,7 +124,7 @@ function App() {
       <div>
         {userData && !error && (
           <div className="user-details" >
-            <div style={{ height: 'auto', width: '50%', display:'flex', justifyContent: 'center', alignItems: 'center', }}>
+            <div style={{ height: 'auto', width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
               <img src={userData.avatar_url} alt="User Avatar" />
             </div>
             <div>
@@ -162,10 +179,29 @@ function App() {
       {/* pagination */}
       <div>
         {userRepos && userRepos.length > 0 && (
-          <div>
-            <div>
-              <label htmlFor="perPage">Repos per page:</label>
-              <select id="perPage" onChange={(e) => handlePerPageChange(Number(e.target.value))} value={perPage}>
+          <div style={{ display: '' }}>
+            <div style={{ margin: '10px', fontWeight: '700' }}>
+              <label htmlFor="perPage">Repositories per page: </label>
+              {/* <select id="perPage" onChange={(e) => handlePerPageChange(Number(e.target.value))} value={perPage}>
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select> */}
+              <select
+                id="perPage"
+                onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                value={perPage}
+                style={{
+                  padding: '8px',
+                  fontSize: '16px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                  backgroundColor: '#fff',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  color:'black' // Remove the default focus outline
+                }}
+              >
                 <option value={10}>10</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
@@ -175,7 +211,15 @@ function App() {
               <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                 Previous
               </button>
-              <span> Page {currentPage} </span>
+              {
+                array.map((item, index) => {
+                  return (
+                    <button key={index} onClick={() => handlePageChange(item)} disabled={currentPage === item}>
+                      {item}
+                    </button>
+                  )
+                })
+              }
               <button onClick={() => handlePageChange(currentPage + 1)} disabled={userRepos.length < perPage || userData.public_repos / currentPage === perPage} >
                 Next
               </button>
