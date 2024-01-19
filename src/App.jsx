@@ -1,5 +1,5 @@
-// App.js
-import { useState } from 'react';
+import loadingImage from './assets/loading.svg';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
@@ -8,6 +8,8 @@ function App() {
   const [userRepos, setUserRepos] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [perPage, setPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   function handleSubmit() {
     setLoading(true);
@@ -22,8 +24,8 @@ function App() {
         .then((data) => {
           console.log(data);
           setUserData(data);
-          setError(null);          
-          fetchRepos()
+          setError(null);
+          fetchRepos(currentPage, perPage); // Pass current page and per page to fetchRepos
         })
         .catch((error) => {
           console.error(error.message);
@@ -33,11 +35,12 @@ function App() {
         });
     }, 2000);
   }
-  function fetchRepos() {
-    fetch(`https://api.github.com/users/${user}/repos`)
+
+  function fetchRepos(page, perPage) {
+    fetch(`https://api.github.com/users/${user}/repos?page=${page}&per_page=${perPage}`)
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`User not found (${response.status})`);
+          throw new Error(`User repositories not found (${response.status})`);
         }
         return response.json();
       })
@@ -50,10 +53,26 @@ function App() {
       .catch((error) => {
         console.error(error.message);
         setUserRepos(null);
-        setError('User not found. Please check the username.');
+        setError('User repositories not found. Please check the username.');
         setLoading(false);
       });
   }
+
+  useEffect(() => {
+    if (userData) {
+      fetchRepos(currentPage, perPage);
+    }
+  }, [user, userData, currentPage, perPage]);
+
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Reset to the first page when changing perPage
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   return (
     <div className="container">
       <div className="input-container">
@@ -70,10 +89,11 @@ function App() {
         <button onClick={handleSubmit}>Click</button>
       </div>
 
-      {loading &&
-        <p style={{ color: "red" }}>
-          Loading...<img src='./' />
-        </p>}
+      {loading && (
+        <p style={{ color: 'red' }}>
+          <img style={{height:'50px', margin:'100px'}} src={loadingImage} alt="Loading" />
+        </p>
+      )}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       <div>
@@ -111,19 +131,39 @@ function App() {
                   </div>
                   <div style={{ margin: '10px 0px' }}>{repo.description}</div>
                   <div style={{ margin: '10px 0px' }}>
-                    {
-                      (repo.fork)
-                      &&
+                    {repo.fork && (
                       <span style={{ fontSize: '80%', backgroundColor: '#242424', padding: '2px 4px', borderRadius: '5px', margin: '0 10px 0 0' }}>Forked</span>
-                    }
-                    {
-                      (repo.language)
-                      &&
+                    )}
+                    {repo.language && (
                       <span style={{ fontSize: '80%', backgroundColor: '#242424', padding: '2px 4px', borderRadius: '5px' }}>{repo.language}</span>
-                    }
+                    )}
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div>
+        {userRepos && userRepos.length > 0 && (
+          <div>
+            <div>
+              <label htmlFor="perPage">Repos per page:</label>
+              <select id="perPage" onChange={(e) => handlePerPageChange(Number(e.target.value))} value={perPage}>
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+            <div>
+              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                Previous
+              </button>
+              <span> Page {currentPage} </span>
+              <button onClick={() => handlePageChange(currentPage + 1)} disabled={userRepos.length < perPage}>
+                Next
+              </button>
             </div>
           </div>
         )}
