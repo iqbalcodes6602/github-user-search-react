@@ -1,36 +1,24 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Track */
+::-webkit-scrollbar-track {
+  background: #242424; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #0366d6; 
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #0365d696; 
 }
 
 .card {
@@ -40,7 +28,6 @@
 .read-the-docs {
   color: #888;
 }
-`/* App.css */
 
 .container {
   display: flex;
@@ -54,11 +41,14 @@
 }
 
 .user-details {
-  border: 1px solid #ccc;
   border-radius: 5px;
   padding: 20px;
   width: 300px;
   text-align: center;
+  background-color: #191919;
+  width: 70vw;
+  display: flex;
+  border:2px solid #0366d6;
 }
 
 .user-details img {
@@ -74,4 +64,11 @@
 
 .user-details a:hover {
   text-decoration: underline;
+}
+
+.search-input{
+  padding: 5px 10px;
+}
+.search-input:focus {
+  outline: none;
 }

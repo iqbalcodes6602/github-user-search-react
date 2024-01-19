@@ -1,4 +1,5 @@
 import loadingImage from './assets/loading.svg';
+import logo from './assets/logo.png';
 import { useState, useEffect } from 'react';
 import './App.css';
 
@@ -31,6 +32,7 @@ function App() {
           console.error(error.message);
           setUserData(null);
           setError('User not found. Please check the username.');
+          setUserRepos(null);
           setLoading(false);
         });
     }, 2000);
@@ -62,11 +64,11 @@ function App() {
     if (userData) {
       fetchRepos(currentPage, perPage);
     }
-  }, [user, userData, currentPage, perPage]);
+  }, [currentPage, perPage]);
 
   const handlePerPageChange = (newPerPage) => {
     setPerPage(newPerPage);
-    setCurrentPage(1); // Reset to the first page when changing perPage
+    setCurrentPage(1);
   };
 
   const handlePageChange = (newPage) => {
@@ -75,47 +77,59 @@ function App() {
 
   return (
     <div className="container">
-      <div className="input-container">
-        <input
-          type="text"
-          onChange={(e) => setUser(e.target.value)}
-          value={user}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSubmit();
-            }
-          }}
-        />
-        <button onClick={handleSubmit}>Click</button>
+
+      {/* search section */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: 'calc(100vw - 50px)', height: '90vh', backgroundColor: '' }}>
+        <img style={{ width: '30%' }} src={logo} />
+        <div style={{ margin: '2rem', minWidth: '50px', width: '20%' }}>
+          <input
+            className='search-input'
+            style={{ height: '50px', width: '100%', border: 'none', borderBottom: '2px solid #0366d6', background: 'transparent', }}
+            type="text"
+            onChange={(e) => setUser(e.target.value)}
+            value={user}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSubmit();
+              }
+            }}
+          />
+        </div>
+        <div style={{ minWidth: '50px', width: '20%' }}>
+          <button style={{ width: '100%' }} onClick={handleSubmit}>
+            {loading ? <img style={{ height: '20px' }} src={loadingImage} alt="Loading" /> : 'Search'}
+          </button>
+        </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
-      {loading && (
-        <p style={{ color: 'red' }}>
-          <img style={{height:'50px', margin:'100px'}} src={loadingImage} alt="Loading" />
-        </p>
-      )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
+      {/* user data card */}
       <div>
         {userData && !error && (
-          <div className="user-details">
-            <img src={userData.avatar_url} alt="User Avatar" />
-            <h2>{userData.login}</h2>
-            <p>
-              Followers: {userData.followers} | Following: {userData.following}
-            </p>
-            <p>
-              Public Repos: {userData.public_repos} | Public Gists: {userData.public_gists}
-            </p>
-            <p>
-              <a href={userData.html_url} target="_blank" rel="noopener noreferrer">
-                Visit Profile
-              </a>
-            </p>
+          <div className="user-details" >
+            <div style={{ height: 'auto', width: '50%', display:'flex', justifyContent: 'center', alignItems: 'center', }}>
+              <img src={userData.avatar_url} alt="User Avatar" />
+            </div>
+            <div>
+              <h2>{userData.login}</h2>
+              <p>{userData.bio}</p>
+              <p>
+                Followers: {userData.followers} | Following: {userData.following}
+              </p>
+              <p>
+                Public Repos: {userData.public_repos} | Public Gists: {userData.public_gists}
+              </p>
+              <p>
+                <a href={userData.html_url} target="_blank" rel="noopener noreferrer">
+                  Visit Profile
+                </a>
+              </p>
+            </div>
           </div>
         )}
       </div>
 
+      {/* users repos */}
       <div>
         {userRepos && userRepos.length > 0 && (
           <div className="repos-list">
@@ -145,6 +159,7 @@ function App() {
         )}
       </div>
 
+      {/* pagination */}
       <div>
         {userRepos && userRepos.length > 0 && (
           <div>
@@ -161,7 +176,7 @@ function App() {
                 Previous
               </button>
               <span> Page {currentPage} </span>
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={userRepos.length < perPage}>
+              <button onClick={() => handlePageChange(currentPage + 1)} disabled={userRepos.length < perPage || userData.public_repos / currentPage === perPage} >
                 Next
               </button>
             </div>
